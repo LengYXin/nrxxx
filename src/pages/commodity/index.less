@@ -1,0 +1,28 @@
+.commodity-btns {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 800;
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    &.at-tab-bar {
+        display: flex;
+        width: 100%;
+        min-height: 50rpx;
+        padding: 12rpx 0 6rpx;
+        // text-align: center;
+        box-sizing: border-box;
+        justify-content: center;
+        align-items: start;
+        background-color: #FFF;
+        border-top: 1PX #e2ecf4 solid;
+    }
+    .at-tab-bar__item {
+        flex: 1;
+        padding: 12rpx 12rpx 0;
+        color: #333;
+        font-size: 20rpx;
+        transition: all 0.2s;
+    }
+}
