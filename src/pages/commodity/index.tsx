@@ -46,23 +46,10 @@ export default class Index extends Component<any, any> {
                     </SwiperItem>
                 </Swiper>
                 <View className="commodity-btns at-tab-bar">
-                    <View className="at-tab-bar__item">
-                        <AtButton type='primary' size='small'>首页</AtButton>
-                        <AtButton type='primary' size='small'>购物车</AtButton>
-                    </View>
-                    <View >
-                        <AtButton type='primary' size='small'>购买</AtButton>
-                    </View>
+                    {/* <View className="at-tab-bar__item"> */}
+                    {/* </View> */}
+                    <AtButton type='secondary'>购买</AtButton>
                 </View>
-                {/* <AtTabBar
-                    fixed
-                    tabList={[
-                        { title: '待办事项', iconType: 'bullet-list', text: 'new' },
-                        { title: '拍照', iconType: 'camera' },
-                        { title: '文件夹', iconType: 'folder', text: '100', }
-                    ]}
-                    current={this.state.current}
-                /> */}
             </View>
         )
     }

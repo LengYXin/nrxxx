@@ -2,7 +2,6 @@ import '@tarojs/async-await';
 import Taro, { Component, Config } from '@tarojs/taro';
 import './app.less';
 import Index from './pages/index';
-import help from './utils/help';
 class App extends Component {
 
   /**

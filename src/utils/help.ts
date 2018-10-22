@@ -1,4 +1,5 @@
 import Taro, { request, Events, requestPayment, getUserInfo, chooseAddress, login, authorize } from "@tarojs/taro";
+import Server from './server';
 interface IData {
     /** 未授权 */
     unAuthorized: boolean
@@ -8,12 +9,11 @@ interface IData {
     address: any
     /** 临时code */
     code: string
+    /** 用户认证数据 */
+    token: string
 }
 class Help {
     constructor() {
-        // this.chooseAddress();
-        // this.login();
-        // console.log(this);
         this.init();
     }
     events = new Events();
@@ -21,42 +21,62 @@ class Help {
         unAuthorized: true,
         user: {},
         address: {},
-        code: ''
+        code: '',
+        token: '',
     }
-    url = "https://www.easy-mock.com/mock"
+    private url = "https://shop.jizhigame.com"
     /** 请求参数 */
-    requestOBJECT = {
+    private requestOBJECT = {
         header: {
+            'shop-token': '',
             'content-type': 'application/json'
         }
     }
-    async init() {
-        this.getUserInfo({ withCredentials: true });
+    private async init() {
+        // this.getUserInfo({ withCredentials: true });
         Taro.showShareMenu({
             withShareTicket: true
         })
+        await this.getUserInfo();
+        Server.login();
     }
     /**
      * 请求数据
      * @param params 
      */
-    async request(params: request.Param) {
-        Taro.showLoading({
-            title: 'loading',
-            mask: true
-        })
+    async request(params: request.Param, loading = true) {
+        if (loading) {
+            Taro.showLoading({
+                title: 'loading',
+                mask: true
+            })
+        }
         params = { ...this.requestOBJECT, ...params };
+        // console.log("请求：", params.url);
         params.url = this.url + params.url;
         const res = await Taro.request(params);
-        Taro.hideLoading();
-        console.log("request", res);
-        if (res && res.statusCode && res.data && res.data.success) {
+        // console.log("request", res);
+        if (loading) {
+            Taro.hideLoading();
+        }
+        if (res && res.statusCode && res.data && res.data.isSuccess) {
+            // console.log(object);
             return res.data.data;
         } else {
+            // if (loading) {
             Taro.showToast({
                 title: "Error",
             })
+            // }
         }
+    }
+    /**
+     * 设置token
+     * @param token 
+     */
+    setToken(token) {
+        this.data.token = token;
+        this.requestOBJECT.header["shop-token"] = token;
     }
     /**
      * 支付
@@ -70,11 +90,12 @@ class Help {
      * 登陆
      * @param params 
      */
-    async login(params?: login.Param) {
+    private async login(params?: login.Param) {
+        console.log(this.data.code);
         if (this.data.code == '') {
             const res = await Taro.login(params);
             this.data.code = res.code;
-            console.log("login", this.data.code);
+            console.log("微信登陆", this.data);
         }
         return this.data.code;
     }
@@ -104,7 +125,7 @@ class Help {
      * 获取收货地址
      * @param params 
      */
-    async chooseAddress(params?: chooseAddress.Param) {
+     async chooseAddress(params?: chooseAddress.Param) {
         if (this.data.address.userName == null) {
             const res = await Taro.chooseAddress(params)
             this.data.address = res;

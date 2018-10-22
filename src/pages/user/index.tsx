@@ -1,8 +1,9 @@
-import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text, Navigator, Image } from '@tarojs/components'
-import './index.less'
-import { AtAvatar, AtList, AtListItem, AtButton } from 'taro-ui';
-import help from '../../utils/help';
+import { Image, Navigator, Text, View } from '@tarojs/components';
+import Taro, { Component, Config } from '@tarojs/taro';
+import { AtButton, AtList, AtListItem } from 'taro-ui';
+import Help from '../../utils/help';
+import Server from '../../utils/server';
+import './index.less';
 export default class Index extends Component {
   constructor() {
     super()
@@ -18,7 +19,7 @@ export default class Index extends Component {
     navigationBarTitleText: '我的'
   }
   state = {
-    unAuthorized: false,
+    unAuthorized: true,
     user: {
       avatarUrl: '',
       nickName: '',
@@ -42,9 +43,12 @@ export default class Index extends Component {
    * 登陆
    */
   async  onLogin() {
-    await help.getUserInfo();
-    console.log("onLogin", help.data);
-    this.setState({ ...help.data })
+    if (this.state.unAuthorized) {
+      await Help.getUserInfo();
+      console.log("授权登陆", Help.data);
+      Server.login();
+      this.setState({ ...Help.data });
+    }
   }
   render() {
     const { user, code, unAuthorized } = this.state;
