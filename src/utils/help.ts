@@ -57,7 +57,9 @@ class Help {
         const res = await Taro.request(params);
         // console.log("request", res);
         if (loading) {
-            Taro.hideLoading();
+            setTimeout(() => {
+                Taro.hideLoading();
+            }, 300);
         }
         if (res && res.statusCode && res.data && res.data.isSuccess) {
             // console.log(object);

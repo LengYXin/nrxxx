@@ -4,6 +4,7 @@ import './index.less'
 import { AtButton, AtIcon } from 'taro-ui';
 import yesImg from '../../icon/303正确、完成-圆框.png';
 import noImg from '../../icon/303正确、完成-线性圆框.png';
+
 export default class Index extends Component {
 
   /**
@@ -19,7 +20,7 @@ export default class Index extends Component {
   state = {
     allSelection: false,
     price: 0,
-    data: []
+    data: [1, 2, 3, 4]
   }
   componentWillMount() { }
 
@@ -40,7 +41,24 @@ export default class Index extends Component {
     return (
       <View className='index' >
         <View>
-          
+          {this.state.data.map((data, index) => {
+            return <View className='data-item at-row' key={index}>
+              <View className='at-col at-col-4 data-img'>
+              <AtIcon prefixClass="at-icon" value='check-circle' size='25' color={this.state.allSelection ? '#d81e06' : '#cdcdcd'}></AtIcon>
+                <Image
+                  src='https://img14.360buyimg.com/babel/s700x360_jfs/t1/4099/12/2578/101668/5b971b4bE65ae279d/89dd1764797acfd9.jpg!q90!cc_350x180'
+                />
+              </View>
+              <View className='at-col at-col-8 data-info'>
+                <View className='at-row data-name'>
+                  {'商品'}
+                </View>
+                <View className='at-row data-price'>
+                  ￥ {1000.00}
+                </View>
+              </View>
+            </View>
+          })}
         </View>
         <View className="fixed-btns at-tab-bar">
           <View className="btn-qx" onClick={this.onAllSelection.bind(this)}>

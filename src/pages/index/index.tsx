@@ -30,6 +30,11 @@ export default class Index extends Component {
 
     ]
   }
+  isLoading = true;
+  page = {
+    rows: 10,
+    page: 1
+  }
   // 下拉刷新
   onPullDownRefresh() {
     this.getData(true);
@@ -54,8 +59,23 @@ export default class Index extends Component {
   }
   onChange(value) {
     this.setState({ value }, () => {
-      this.getData(true);
+      // this.getData(true);
+      if (this.state.value == "" && this.SearchValue != this.state.value) {
+        this.SearchValue = this.state.value;
+        this.getData(true);
+      }
     })
+  }
+  onBlur() {
+    // if (this.state.value == "" && this.SearchValue != this.state.value) {
+    //   this.SearchValue = this.state.value;
+    //   this.getData(true);
+    // }
+    // if (this.SearchValue == ) {
+    //   return
+    // }
+    // this.SearchValue = this.state.value;
+    // this.getData(true);
   }
   ononActionClick() {
     if (this.SearchValue == this.state.value) {
@@ -82,18 +102,31 @@ export default class Index extends Component {
    * @param refresh 是否刷新
    */
   async getData(refresh = false) {
+    // 没有分页数据了
+    if (!this.isLoading && !refresh) {
+      return console.log("没有数据了");
+    }
+    if (refresh) {
+      this.page.page = 1;
+    }
     let list: any[] = this.state.list;
     let categoryId = (this.state.tabList[this.state.current] as any).id;
     const res = await Server.QuerySku({
       filter: this.state.value,
       categoryId: categoryId,
-      rows: 10,
-      page: 1
+      ...this.page
     });
     if (refresh) {
-      list = res.items
+      list = res.items;
     } else {
       list = [...list, ...res.items];
+    }
+    // 添加分页
+    if (res.items && res.items.length >= this.page.rows) {
+      this.page.page++;
+      this.isLoading = true;
+    } else {
+      this.isLoading = false;
     }
     this.setState({ list })
     Taro.stopPullDownRefresh();
@@ -110,7 +143,7 @@ export default class Index extends Component {
           value={this.state.value}
           onChange={this.onChange.bind(this)}
           onConfirm={this.ononActionClick.bind(this)}
-          onBlur={this.ononActionClick.bind(this)}
+          onBlur={this.onBlur.bind(this)}
           onActionClick={this.ononActionClick.bind(this)}
         />
         <AtTabs
@@ -121,8 +154,11 @@ export default class Index extends Component {
           onClick={this.handleClick.bind(this)}>
         </AtTabs>
         <View className="index-list">
-          {this.state.list.map((data, index) => {
-            return <DataItem data={data} key={index} />
+          {this.state.list.map((data: any, index) => {
+            let tag = "类型";
+            const tags = this.state.tabList.filter(x => x.id == data.categoryId);
+            tag = tags[0] && tags[0].title;
+            return <DataItem data={data} tag={tag} key={index} />
           })}
         </View>
       </View>

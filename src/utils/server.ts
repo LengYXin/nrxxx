@@ -29,6 +29,7 @@ class Server {
             }, false);
             this.loginState = true;
             Help.setToken(this.user.token);
+            this.DeliveryAddress();
             // 未注册
             if (!this.user.isRegistered) {
                 this.Registered()
@@ -70,8 +71,44 @@ class Server {
     */
     async QuerySku(data) {
         const res = await Help.request({ url: "/Api/cgi/Query/Sku", data });
-        console.log(res);
         return res;
+    }
+    /**
+     * 创建 收货地址
+     * @param data 
+     * isDefault	Boolean	
+        fullValue	String	
+        contactMan	String	
+        contactPhone
+     */
+    async CreateDeliveryAddress(data) {
+        const res = await Help.request({ url: "/Api/cgi/Create/DeliveryAddress", method: "POST", data });
+        return res;
+    }
+    /**
+     * 获取地址
+     */
+    async DeliveryAddress() {
+        const res = await Help.request({ url: "/Api/cgi/List/DeliveryAddress" },false);
+        let address = {
+            userName:"",
+            telNumber:"",
+            address:"",
+        };
+        if (res.items.length) {
+            const add = res.items[0];
+            address = {
+                userName: add.contactMan,
+                telNumber: add.contactPhone,
+                address: add.fullValue
+            }
+        }
+        Help.data.address={
+            userName: address.userName,
+            telNumber: address.telNumber,
+            address: address.address
+        }
+        return address;
     }
 }
 export default new Server();
