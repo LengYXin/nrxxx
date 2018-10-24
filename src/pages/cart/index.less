@@ -52,3 +52,74 @@
     // font-size: 45px !important;
     // background: #e2ecf4;
 }
+.address{
+
+}
+.data-item {
+    overflow: hidden;
+    height: 200px; // border-bottom: 1px solid rgb(238, 238, 238);
+    position: relative;
+    &:before {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        border-bottom: 1px solid #e2ecf4 ;
+        transform-origin: 0 0;
+        transform: scale(0.5, 0.5);
+        box-sizing: border-box;
+    }
+    .data-img {
+        padding: 10px;
+        // box-sizing: content-box;
+        image {
+            width: 100%;
+            height: 100%;
+            background: rgb(238, 238, 238);
+        }
+    }
+    .data-select{
+       display: flex;
+       align-items: center;
+       justify-items: center;
+       text-align: center;
+       padding-left: 15px;
+    }
+    .data-info {
+        padding-left: 5px;
+        // padding: 15px 5px 0;
+        font-size: 28px;
+        line-height: 35px; // display: flex;
+        // flex-direction: column;
+        // justify-content: center;
+        // align-items: center;
+    }
+    .at-row {
+        // height: 60px;
+    }
+    .data-price {
+        // padding-top: 15px;
+        height: 80px;
+        line-height: 80px;
+        position: relative;
+        .price {
+            padding-top: 13px;
+            color: red;
+        }
+        .AtInputNumber{
+            right: 10px;
+            position: absolute;
+        }
+    }
+    .data-name {
+        word-wrap: break-word;
+        word-break: normal;
+        white-space: pre-line;
+        padding-bottom: 10px;
+        min-height: 20px;
+    }
+    .data-tag{
+        padding-top: 5px;
+        height: 20px;
+    }
+}

@@ -1,10 +1,10 @@
-import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text, Button, Image } from '@tarojs/components'
-import './index.less'
-import { AtButton, AtIcon } from 'taro-ui';
-import yesImg from '../../icon/303正确、完成-圆框.png';
-import noImg from '../../icon/303正确、完成-线性圆框.png';
-
+import { Image, Navigator, Text, View } from '@tarojs/components';
+import Taro, { Component, Config } from '@tarojs/taro';
+import { AtButton, AtIcon, AtInputNumber, AtList, AtListItem, AtTag } from 'taro-ui';
+import Cart from '../../utils/cart';
+import Help from '../../utils/help';
+import Server from '../../utils/server';
+import './index.less';
 export default class Index extends Component {
 
   /**
@@ -18,9 +18,10 @@ export default class Index extends Component {
     navigationBarTitleText: '购物车'
   }
   state = {
-    allSelection: false,
+    allSelect: false,
+    userName: "",
     price: 0,
-    data: [1, 2, 3, 4]
+    data: Cart.cart.slice()
   }
   componentWillMount() { }
 
@@ -29,32 +30,127 @@ export default class Index extends Component {
   }
   componentWillUnmount() { }
 
-  componentDidShow() { }
-
+  componentDidShow() {
+    this.setCart(Cart.cart)
+  }
+  setCart(cart: any[]) {
+    let allSelect = false;
+    let price = 0;
+    if (cart.every(x => x.select)) {
+      allSelect = true;
+    }
+    // 计算价格
+    cart.map(x => {
+      if (x.select) {
+        price += x.price * x.number
+      }
+    })
+    this.setState({
+      data: cart,
+      price: price.toFixed(2),
+      userName: Help.data.address.userName,
+      allSelect: allSelect
+    })
+    Taro.setStorageSync("cart", cart);
+  }
   componentDidHide() { }
+  // 全选
   onAllSelection() {
-    const allSelection = this.state.allSelection;
-    this.setState({ allSelection: !allSelection })
+    const allSelection = !this.state.allSelect;
+    const cart = this.state.data;
+    this.setCart(cart.map(x => {
+      x.select = allSelection;
+      return x;
+    }))
+    // this.setState({ allSelection: !allSelection })
+  }
+  // 更商品数量
+  handleChange(index, number, e) {
+    e.stopPropagation()
+    e.preventDefault();
+    const data = this.state.data;
+    data[index].number = number;
+    this.setCart(data)
+  }
+  // 商品选择
+  selectCart(index, e) {
+    e.stopPropagation()
+    const data = this.state.data;
+    data[index].select = !data[index].select;
+    console.log(data);
+    this.setCart(data)
+  }
+  // 结算
+  async onSettlement() {
+    // address = {
+    //   userName: res.userName,
+    //   telNumber: res.telNumber,
+    //   address: res.address
+    // }
+    if (Help.data.address.userName == "" || Help.data.address.userName == null) {
+      return Taro.showToast({ title: "请设置收货地址", icon: "none" })
+    }
+    const res = await Server.CreateSaleBill({
+      contactMan: Help.data.address.userName,
+      contactPhone: Help.data.address.telNumber,
+      address: Help.data.address.address,
+      skus: this.state.data.map(x => {
+        return {
+          id: x.id,
+          count: x.number
+        }
+      })
+    });
+    if (res) {
+      Cart.cart = [];
+      this.setCart([])
+    }
+  }
+  onGotoMore() {
+    Taro.navigateTo({
+      url: 'pages/address/index'
+    })
+  }
+  stopPropagation = (e) => {
+    e.stopPropagation()
   }
   render() {
-
     return (
       <View className='index' >
+        <AtList>
+          <Navigator url="/pages/address/index">
+            <AtListItem title={'收件人：' + this.state.userName} arrow='right' />
+          </Navigator>
+        </AtList>
         <View>
-          {this.state.data.map((data, index) => {
-            return <View className='data-item at-row' key={index}>
-              <View className='at-col at-col-4 data-img'>
-              <AtIcon prefixClass="at-icon" value='check-circle' size='25' color={this.state.allSelection ? '#d81e06' : '#cdcdcd'}></AtIcon>
+          {this.state.data.slice().length <= 0 ? <View style="text-align:center;padding-top:30px;font-size:16px;color:#ccc;">购物车中没有商品</View> : this.state.data.slice().map((data: any, index) => {
+            return <View className='data-item at-row' key={index} onClick={this.selectCart.bind(this, index)}>
+              <View className='at-col at-col-1 data-select' >
+                <AtIcon prefixClass="at-icon" value='check-circle' size='20' color={data.select ? '#d81e06' : '#cdcdcd'}></AtIcon>
+              </View>
+              <View className='at-col at-col-4 data-img' >
                 <Image
                   src='https://img14.360buyimg.com/babel/s700x360_jfs/t1/4099/12/2578/101668/5b971b4bE65ae279d/89dd1764797acfd9.jpg!q90!cc_350x180'
                 />
               </View>
-              <View className='at-col at-col-8 data-info'>
+              <View className='at-col at-col-7 data-info'>
                 <View className='at-row data-name'>
-                  {'商品'}
+                  {data.id}
                 </View>
-                <View className='at-row data-price'>
-                  ￥ {1000.00}
+                <View className="data-tag">
+                  <AtTag size='small'>{'标签'}</AtTag>
+                </View>
+                <View className='at-row data-price'  >
+                  <Text className="price">￥ {parseInt(data.price).toFixed(2)}</Text>
+                  <View className="AtInputNumber" onClick={this.stopPropagation}>
+                    <AtInputNumber
+                      min={1}
+                      max={99999}
+                      step={1}
+                      value={data.number}
+                      onChange={this.handleChange.bind(this, index)}
+                    />
+                  </View>
                 </View>
               </View>
             </View>
@@ -64,14 +160,14 @@ export default class Index extends Component {
           <View className="btn-qx" onClick={this.onAllSelection.bind(this)}>
             {/* <Image src={this.state.allSelection ? yesImg : noImg} className="btn-qx-img" /> */}
             <Text>&emsp;</Text>
-            <AtIcon prefixClass="at-icon" value='check-circle' size='25' color={this.state.allSelection ? '#d81e06' : '#cdcdcd'}></AtIcon>
+            <AtIcon prefixClass="at-icon" value='check-circle' size='25' color={this.state.allSelect ? '#d81e06' : '#cdcdcd'}></AtIcon>
             <Text>&emsp;全选</Text>
           </View>
           <View className="at-tab-bar__item btn-price" onClick={this.onAllSelection.bind(this)}>
             <View>总计：{this.state.price}</View>
           </View>
           <View className="at-tab-bar__item btn-js">
-            <AtButton type='secondary' >结算</AtButton>
+            <AtButton type='secondary' onClick={this.onSettlement.bind(this)} >结算</AtButton>
           </View>
         </View>
       </View>

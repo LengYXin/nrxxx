@@ -3,11 +3,11 @@ import { AtTag } from 'taro-ui'
 import Taro, { Component } from '@tarojs/taro';
 // require("taro-ui/dist/weapp/css/index.css")
 import './dataItem.less';
-export default class Index extends Component<{ data: any,tag:string }, any> {
+export default class Index extends Component<{ data: any, tag: string }, any> {
     render() {
         const { data } = this.props;
         return (
-            <Navigator url="/pages/commodity/index">
+            <Navigator url={'/pages/commodity/index?id=' + data.id}>
                 <View className='data-item at-row'>
                     <View className='at-col at-col-4 data-img'>
                         <Image

@@ -2,6 +2,7 @@ import Taro, { Component, Config } from '@tarojs/taro'
 import { View, Text, Button, Swiper, SwiperItem, Image } from '@tarojs/components'
 import './index.less'
 import { AtTabBar, AtButton } from 'taro-ui';
+import cart from '../../utils/cart';
 export default class Index extends Component<any, any> {
 
     /**
@@ -14,6 +15,17 @@ export default class Index extends Component<any, any> {
     config: Config = {
         navigationBarTitleText: '详情',
         // enablePullDownRefresh: true,
+    }
+    componentWillMount() {
+        console.log(this.$router.params)
+    }
+    onAddCart() {
+        cart.addCart({
+            number: 1,
+            select: true,
+            price: 9.9,
+            ...this.$router.params
+        })
     }
     render() {
         return (
@@ -48,7 +60,7 @@ export default class Index extends Component<any, any> {
                 <View className="commodity-btns at-tab-bar">
                     {/* <View className="at-tab-bar__item"> */}
                     {/* </View> */}
-                    <AtButton type='secondary'>购买</AtButton>
+                    <AtButton type='secondary' onClick={this.onAddCart.bind(this)}>购买</AtButton>
                 </View>
             </View>
         )

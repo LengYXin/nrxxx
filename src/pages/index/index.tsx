@@ -1,4 +1,4 @@
-import { View } from '@tarojs/components';
+import { View, ScrollView } from '@tarojs/components';
 import Taro, { Component, Config } from '@tarojs/taro';
 import { AtSearchBar, AtTabs } from 'taro-ui';
 import Help from '../../utils/help';
@@ -136,6 +136,12 @@ export default class Index extends Component {
       this.getData(true);
     });
   }
+  onScrolltoupper() {
+    console.log("onScrolltoupper");
+  }
+  onScrollToLower() {
+    this.getData();
+  }
   render() {
     return (
       <View className='index' >
@@ -153,14 +159,31 @@ export default class Index extends Component {
           tabList={this.state.tabList}
           onClick={this.handleClick.bind(this)}>
         </AtTabs>
-        <View className="index-list">
-          {this.state.list.map((data: any, index) => {
-            let tag = "类型";
-            const tags = this.state.tabList.filter(x => x.id == data.categoryId);
-            tag = tags[0] && tags[0].title;
-            return <DataItem data={data} tag={tag} key={index} />
-          })}
-        </View>
+        <ScrollView
+          className='scrollview'
+          scrollY
+          scrollWithAnimation
+          enableBackToTop
+          style="height:calc(100vh - 92px);"
+          scrollTop={0}
+          lowerThreshold={20}
+          upperThreshold={20}
+          onScrollToUpper={this.onScrolltoupper.bind(this)}
+          onScrollToLower={this.onScrollToLower.bind(this)}
+          // onScroll={this.onScroll}
+        >
+          <View className="index-list">
+            {this.state.list.length<=0?<View style="text-align:center;padding-top:30px;font-size:16px;color:#ccc;">暂时还没有商品</View>: this.state.list.map((data: any, index) => {
+              let tag = "类型";
+              const tags = this.state.tabList.filter(x => x.id == data.categoryId);
+              tag = tags[0] && tags[0].title;
+              data.price = parseInt(data.price).toFixed(2)
+              data.origPrice = parseInt(data.origPrice).toFixed(2)
+              return <DataItem data={data} tag={tag} key={index} />
+            })}
+          </View>
+        </ScrollView>
+
       </View>
     )
   }

@@ -35,7 +35,7 @@ export default class Index extends Component {
   }
 
   componentDidHide() { }
-  onSubmit(e) {
+  async onSubmit(e) {
     // console.log(this.address);
     if (this.address.userName == "" || this.address.userName == null) {
       return Taro.showToast({ title: "请输入收货人姓名", icon: "none" })
@@ -46,12 +46,16 @@ export default class Index extends Component {
     if (this.address.address == "" || this.address.address == null) {
       return Taro.showToast({ title: "请输入详细地址", icon: "none" })
     }
-    Server.CreateDeliveryAddress({
+    await Server.CreateDeliveryAddress({
       isDefault: true,
       fullValue: this.address.address,
       contactMan: this.address.userName,
       contactPhone: this.address.telNumber
     })
+    Taro.showToast({ title: "" })
+    setTimeout(() => {
+      Taro.navigateBack();
+    }, 1000);
   }
   handleChange(type, e) {
     let value = e;
@@ -93,14 +97,14 @@ export default class Index extends Component {
             value={this.state.telNumber}
             onChange={this.handleChange.bind(this, 'telNumber')}
           />
-         <View style={{paddingRight:"32rpx"}}>
-         <AtTextarea
-            value={this.state.address}
-            onChange={this.handleChange.bind(this, 'address')}
-            maxlength='200'
-            placeholder='详细地址'
-          />
-         </View>
+          <View style={{ paddingRight: "32rpx" }}>
+            <AtTextarea
+              value={this.state.address}
+              onChange={this.handleChange.bind(this, 'address')}
+              maxlength='200'
+              placeholder='详细地址'
+            />
+          </View>
         </AtForm>
         <View className="btn">
           {this.state.userName == '' || this.state.userName == null ? <AtButton type='secondary' onClick={this.chooseAddress.bind(this)}>使用微信地址</AtButton> : null}

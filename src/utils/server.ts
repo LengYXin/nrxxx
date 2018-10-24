@@ -10,6 +10,7 @@ class Server {
         isRegistered: false,
         token: ""
     };
+    cart = [];
     private loginState = false;
     /**
      * 登陆
@@ -89,11 +90,11 @@ class Server {
      * 获取地址
      */
     async DeliveryAddress() {
-        const res = await Help.request({ url: "/Api/cgi/List/DeliveryAddress" },false);
+        const res = await Help.request({ url: "/Api/cgi/List/DeliveryAddress" }, false);
         let address = {
-            userName:"",
-            telNumber:"",
-            address:"",
+            userName: "",
+            telNumber: "",
+            address: "",
         };
         if (res.items.length) {
             const add = res.items[0];
@@ -103,12 +104,32 @@ class Server {
                 address: add.fullValue
             }
         }
-        Help.data.address={
+        Help.data.address = {
             userName: address.userName,
             telNumber: address.telNumber,
             address: address.address
         }
         return address;
     }
+    /**
+     * 查询订单
+     * 待支付 190100
+        待发货 190101
+        待收货 190102
+        已完成 190103
+     */
+    async QuerySaleBill(data) {
+        const res = await Help.request({ url: "/Api/cgi/Query/SaleBill", data });
+        return res;
+    }
+    /**
+     * 创建订单
+     * @param data 
+     */
+    async CreateSaleBill(data) {
+        const res = await Help.request({ url: "/Api/cgi/Create/SaleBill", data, method: "POST" });
+        return res;
+    }
+
 }
 export default new Server();
