@@ -89,8 +89,9 @@ export default class Index extends Component {
     // const user = await Server.login()
     // console.log(user);
     this.getSkuCategoryRoot(() => {
-      this.getData(true);
+      
     });
+    this.getData(true);
   }
   async getSkuCategoryRoot(callback) {
     let tabList = await Server.SkuCategoryRoot()

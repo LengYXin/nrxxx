@@ -112,6 +112,13 @@ class Server {
         return address;
     }
     /**
+     * 优惠劵
+     */
+    async Coupon(){
+        const res = await Help.request({ url: "/Api/cgi/List/Coupon"});
+        return res;
+    }
+    /**
      * 查询订单
      * 待支付 190100
         待发货 190101

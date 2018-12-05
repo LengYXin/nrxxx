@@ -1,6 +1,6 @@
-import { View, Text, Image,ScrollView } from '@tarojs/components';
+import { View, Text, Image, ScrollView } from '@tarojs/components';
 import Taro, { Component, Config } from '@tarojs/taro';
-import { AtCard, AtTabs } from 'taro-ui';
+import { AtCard, AtTabs, AtButton } from 'taro-ui';
 import Help from '../../utils/help';
 import Server from '../../utils/server';
 import './index.less';
@@ -100,7 +100,17 @@ export default class Index extends Component {
   onScrollToLower() {
     this.getData();
   }
+  onClick(data) {
+    console.log(data);
+  }
   render() {
+    const state = {
+      '190100': '待支付',
+      '190101': '待发货',
+      '190102': '待收货',
+      '190103': '已完成',
+    }
+
     return (
       <View >
         <AtTabs
@@ -121,36 +131,41 @@ export default class Index extends Component {
           upperThreshold={20}
           onScrollToUpper={this.onScrolltoupper.bind(this)}
           onScrollToLower={this.onScrollToLower.bind(this)}
-          >
-          {this.state.list.length<=0?<View style="text-align:center;padding-top:30px;font-size:16px;color:#ccc;">您暂时还没有订单</View>: this.state.list.map((data: any, index) => {
-          return <View key={index}>
-            <View style={{ height: "8px" }}></View>
-            <AtCard
-              extra={`￥${parseInt(data.amount).toFixed(2)}`}
-              title={`订单:${data.no}`}
-              note={data.createdTime}
-            >
-              {data.skus.map((x, i) => {
-                return <View className='data-item at-row' key={i}>
-                  <View className='at-col at-col-4 data-img'>
-                    <Image
-                      src={x.thumbUrl}
-                    />
-                  </View>
-                  <View className='at-col at-col-8 data-info'>
-                    <View className='at-row data-name'>
-                      {x.text}
+        >
+          {this.state.list.length <= 0 ? <View style="text-align:center;padding-top:30px;font-size:16px;color:#ccc;">您暂时还没有订单</View> : this.state.list.map((data: any, index) => {
+            return <View key={index}>
+              <View style={{ height: "8px" }}></View>
+              <AtCard
+                extra={`￥${parseInt(data.amount).toFixed(2)}`}
+                title={`[ ${state[data.status]} ] : ${data.no}`}
+                note={data.createdTime}
+                className="order-card"
+              >
+                {data.skus.map((x, i) => {
+                  return <View className='data-item at-row' key={i}>
+                    <View className='at-col at-col-4 data-img'>
+                      <Image
+                        src={x.thumbUrl}
+                      />
                     </View>
-                    <View className='at-row data-price'>
-                      ￥{parseInt(x.amount).toFixed(2)}
+                    <View className='at-col at-col-8 data-info'>
+                      <View className='at-row data-name'>
+                        {x.text}
+                      </View>
+                      <View className='at-row data-price'>
+                        <Text>￥{parseInt(x.amount).toFixed(2)}</Text> 数量：{x.count}
+                      </View>
                     </View>
                   </View>
-                </View>
-              })}
-            </AtCard>
-          </View>
-        })}
-        <View style={{ height: "20px" }}></View>
+                })}
+                {data.status == 190100 ?
+                  <View><AtButton onClick={this.onClick.bind(this, data)} type='primary'>支付</AtButton></View> :
+                  data.status == 190102 ?
+                    <View><AtButton onClick={this.onClick.bind(this, data)}>收货</AtButton></View> : null}
+              </AtCard>
+            </View>
+          })}
+          <View style={{ height: "20px" }}></View>
         </ScrollView>
       </View>
     )

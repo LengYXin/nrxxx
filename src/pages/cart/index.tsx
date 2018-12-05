@@ -1,6 +1,6 @@
 import { Image, Navigator, Text, View } from '@tarojs/components';
 import Taro, { Component, Config } from '@tarojs/taro';
-import { AtButton, AtIcon, AtInputNumber, AtList, AtListItem, AtTag } from 'taro-ui';
+import { AtButton, AtIcon, AtInputNumber, AtList, AtListItem, AtTag, AtFloatLayout, AtRadio } from 'taro-ui';
 import Cart from '../../utils/cart';
 import Help from '../../utils/help';
 import Server from '../../utils/server';
@@ -18,8 +18,19 @@ export default class Index extends Component {
     navigationBarTitleText: '购物车'
   }
   state = {
+    couponsList: [],//优惠劵列表
+    couponsKey: "",
+    // 选择的优惠劵
+    coupons: {
+      no: '',
+      amount: 0,
+    },
+    // 优惠劵列表
+    isOpened: false,
+    // 全选
     allSelect: false,
     userName: "",
+    // 总价
     price: 0,
     data: Cart.cart.slice()
   }
@@ -81,16 +92,33 @@ export default class Index extends Component {
     this.setCart(data)
   }
   // 结算
-  async onSettlement() {
+  async onSettlement(type) {
     // address = {
     //   userName: res.userName,
     //   telNumber: res.telNumber,
     //   address: res.address
     // }
+
+    if (this.state.data.slice().length <= 0) {
+      return Taro.showToast({ title: "购物车没有商品", icon: "none" })
+    }
     if (Help.data.address.userName == "" || Help.data.address.userName == null) {
       return Taro.showToast({ title: "请设置收货地址", icon: "none" })
     }
+    // 获取优惠劵，没有优惠劵直接跳过
+    if (type != "payment") {
+      const res = await Server.Coupon();
+      if (res.items.length > 0) {
+        return this.setState({ isOpened: true, couponsList: res.items })
+      } else {
+        this.onPayment();
+      }
+    }
+    this.onPayment();
+  }
+  async onPayment() {
     const res = await Server.CreateSaleBill({
+      no: this.state.coupons.no,
       contactMan: Help.data.address.userName,
       contactPhone: Help.data.address.telNumber,
       address: Help.data.address.address,
@@ -104,6 +132,7 @@ export default class Index extends Component {
     if (res) {
       Cart.cart = [];
       this.setCart([])
+      this.setState({ isOpened: false, couponsKey: null, coupons: null })
     }
   }
   onGotoMore() {
@@ -113,6 +142,13 @@ export default class Index extends Component {
   }
   stopPropagation = (e) => {
     e.stopPropagation()
+  }
+  handleClose = e => {
+    this.setState({ isOpened: false })
+  }
+  couponsChange(e) {
+    const coupons = JSON.parse(e)
+    this.setState({ couponsKey: e, coupons })
   }
   render() {
     return (
@@ -164,12 +200,26 @@ export default class Index extends Component {
             <Text>&emsp;全选</Text>
           </View>
           <View className="at-tab-bar__item btn-price" onClick={this.onAllSelection.bind(this)}>
-            <View>总计：{this.state.price}</View>
+            <View >总计：<Text className="price-text">￥ {this.state.price}</Text></View>
           </View>
           <View className="at-tab-bar__item btn-js">
             <AtButton type='secondary' onClick={this.onSettlement.bind(this)} >结算</AtButton>
           </View>
         </View>
+        <AtFloatLayout
+          isOpened={this.state.isOpened}
+          title='选择优惠券'
+          onClose={this.handleClose} >
+          <View>小计：<Text className="price-text">￥ {this.state.price}</Text><Text className="price-jian">-</Text><Text className="price-text">￥ {this.state.coupons.amount.toFixed(2)}</Text></View>
+          <AtRadio
+            options={this.state.couponsList.map((x: any) => {
+              return { label: x.text, desc: `金额：￥ ${x.amount.toFixed(2)}`, value: JSON.stringify(x) }
+            })}
+            value={this.state.couponsKey}
+            onClick={this.couponsChange.bind(this)}
+          />
+          <AtButton type='secondary' onClick={this.onSettlement.bind(this, 'payment')} >结算 <Text className="price-text">￥ {(this.state.price - this.state.coupons.amount).toFixed(2)}</Text></AtButton>
+        </AtFloatLayout>
       </View>
     )
   }

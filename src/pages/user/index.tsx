@@ -61,7 +61,7 @@ export default class Index extends Component {
           <View className="avatar">
             <Image className="img" src={user.avatarUrl} />
             <Text>{user.nickName}</Text>
-            <Text>{code}</Text>
+            {/* <Text>{code}</Text> */}
           </View>
         }
         <AtList>
