@@ -65,6 +65,7 @@
     overflow: hidden;
     height: 200px; // border-bottom: 1px solid rgb(238, 238, 238);
     position: relative;
+   
     &:before {
         content: '';
         position: absolute;
@@ -123,6 +124,13 @@
         white-space: pre-line;
         padding-bottom: 10px;
         min-height: 20px;
+        position: relative;
+        .delete{
+            position: absolute;
+            right: 10px;
+            top: 0;
+            font-size: 20px;
+        }
     }
     .data-tag{
         padding-top: 5px;

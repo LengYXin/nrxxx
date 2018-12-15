@@ -178,8 +178,8 @@ export default class Index extends Component {
               let tag = "类型";
               const tags = this.state.tabList.filter(x => x.id == data.categoryId);
               tag = tags[0] && tags[0].title;
-              data.price = parseInt(data.price).toFixed(2)
-              data.origPrice = parseInt(data.origPrice).toFixed(2)
+              data.price = parseFloat(data.price).toFixed(2)
+              data.origPrice = parseFloat(data.origPrice).toFixed(2)
               return <DataItem data={data} tag={tag} key={index} />
             })}
           </View>

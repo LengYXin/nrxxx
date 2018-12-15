@@ -37,6 +37,7 @@ class Help {
         Taro.showShareMenu({
             withShareTicket: true
         })
+        console.log("初始化");
         await this.getUserInfo();
         Server.login();
     }
@@ -67,6 +68,7 @@ class Help {
         } else {
             // if (loading) {
             Taro.showToast({
+
                 title: "Error",
             })
             // }
@@ -84,9 +86,24 @@ class Help {
      * 支付
      * @param params 
      */
-    async requestPayment(params: requestPayment.Param) {
-        const res = await Taro.requestPayment(params)
-        return res;
+    async requestPayment(params: { nonceStr: string, package: string, paySign: string, timeStamp: string }) {
+        try {
+            const res = await Taro.requestPayment({
+                signType: "MD5",
+                ...params,
+            })
+            Taro.showToast({
+                title: "支付成功",
+                icon: "success",
+            })
+            return true
+        } catch (error) {
+            Taro.showToast({
+                title: "支付失败",
+                icon: "none",
+            })
+            return false
+        }
     }
     /**
      * 登陆
@@ -127,7 +144,7 @@ class Help {
      * 获取收货地址
      * @param params 
      */
-     async chooseAddress(params?: chooseAddress.Param) {
+    async chooseAddress(params?: chooseAddress.Param) {
         if (this.data.address.userName == null) {
             const res = await Taro.chooseAddress(params)
             this.data.address = res;

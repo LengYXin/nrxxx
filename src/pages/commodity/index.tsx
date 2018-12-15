@@ -1,8 +1,10 @@
-import Taro, { Component, Config } from '@tarojs/taro'
-import { View, Text, Button, Swiper, SwiperItem, Image } from '@tarojs/components'
-import './index.less'
-import { AtTabBar, AtButton } from 'taro-ui';
+import { Image, Swiper, SwiperItem, View, Text, Navigator } from '@tarojs/components';
+import Taro, { Component, Config } from '@tarojs/taro';
+import { AtButton, AtTag, AtInputNumber, AtList, AtListItem } from 'taro-ui';
 import cart from '../../utils/cart';
+import Server from '../../utils/server';
+import './index.less';
+import 'taro-ui/dist/weapp/css/index.css';
 export default class Index extends Component<any, any> {
 
     /**
@@ -16,18 +18,36 @@ export default class Index extends Component<any, any> {
         navigationBarTitleText: '详情',
         // enablePullDownRefresh: true,
     }
-    componentWillMount() {
-        console.log(this.$router.params)
+    state: any = {
+        data: {
+
+        },
+        number: 1,
+    }
+    async componentWillMount() {
+        const res = await Server.GetSkuDetail(this.$router.params.id)
+        this.setState({
+            data: res
+        })
+        console.log(res);
     }
     onAddCart() {
+        const { id, text, price, origPrice, categoryText, thumbUrl } = this.state.data;
         cart.addCart({
-            number: 1,
+            id,
+            text,
+            price,
+            origPrice,
+            number: this.state.number,
+            thumbUrl,
             select: true,
-            price: 9.9,
-            ...this.$router.params
         })
     }
+    handleChange(number) {
+        this.setState({ number: number })
+    }
     render() {
+        const { text, price, origPrice, description, categoryText, thumbUrl } = this.state.data;
         return (
             <View className='commodity' >
                 <Swiper
@@ -40,27 +60,36 @@ export default class Index extends Component<any, any> {
                 >
                     <SwiperItem itemId="1">
                         <Image
-                            style='width: 100%;height: 100%;'
-                            src='https://img10.360buyimg.com/babel/s700x360_jfs/t25855/203/725883724/96703/5a598a0f/5b7a22e1Nfd6ba344.jpg!q90!cc_350x180'
-                        />
-                    </SwiperItem>
-                    <SwiperItem itemId="2">
-                        <Image
-                            style='width: 100%;height: 100%;'
-                            src='https://img11.360buyimg.com/babel/s700x360_jfs/t1/4776/39/2280/143162/5b9642a5E83bcda10/d93064343eb12276.jpg!q90!cc_350x180'
-                        />
-                    </SwiperItem>
-                    <SwiperItem itemId="3">
-                        <Image
-                            style='width: 100%;height: 100%;'
-                            src='https://img14.360buyimg.com/babel/s700x360_jfs/t1/4099/12/2578/101668/5b971b4bE65ae279d/89dd1764797acfd9.jpg!q90!cc_350x180'
+                            style='width: 100%;height: 100%;background:#eee'
+                            src={thumbUrl}
                         />
                     </SwiperItem>
                 </Swiper>
+                <View className='at-article__h1'>
+                    {text} <AtTag size='small'>{categoryText}</AtTag>
+                </View>
+                <View className='at-article__h3'>
+                    <Text>价格：</Text><Text className="data-price">￥{price}  </Text> <Text className='origPrice'>￥{origPrice}</Text>
+                </View>
+                <View className='at-article__p'>
+                    描述： {description}
+                </View>
                 <View className="commodity-btns at-tab-bar">
-                    {/* <View className="at-tab-bar__item"> */}
-                    {/* </View> */}
-                    <AtButton type='secondary' onClick={this.onAddCart.bind(this)}>购买</AtButton>
+                    <View className="commodity-btn-bo">
+                        <AtInputNumber
+                            min={1}
+                            max={99999}
+                            step={1}
+                            value={this.state.number}
+                            onChange={this.handleChange.bind(this)}
+                        />
+                        <View style="padding-left:50px">
+                            <Navigator url="/pages/cart/index" open-type="switchTab">
+                                购物车>
+                            </Navigator>
+                        </View>
+                    </View>
+                    <AtButton type='secondary' onClick={this.onAddCart.bind(this)}>加入购物车</AtButton>
                 </View>
             </View>
         )

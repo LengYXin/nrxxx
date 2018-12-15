@@ -1,11 +1,18 @@
 .commodity-btns {
     position: fixed;
-    bottom: 0;
+    bottom: 20px;
     left: 0;
     right: 0;
     z-index: 800;
     padding-bottom: constant(safe-area-inset-bottom);
     padding-bottom: env(safe-area-inset-bottom);
+    .commodity-btn-bo{
+        padding-bottom: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
     &.at-tab-bar {
         // display: flex;
         width: 100%;
@@ -25,4 +32,16 @@
         font-size: 20rpx;
         transition: all 0.2s;
     }
+}
+.data-price {
+    height: 30px;
+    padding-top: 15px;
+    color: red;
+   
+}
+.origPrice {
+    font-size: 20px;
+    color: rgb(104, 103, 103);
+    text-decoration:line-through;
+    margin-left: 20px;
 }

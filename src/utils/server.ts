@@ -1,4 +1,5 @@
 import Help from './help';
+import Taro from '@tarojs/taro';
 /**
  * 数据服务
  */
@@ -75,6 +76,14 @@ class Server {
         return res;
     }
     /**
+     * 获取详情
+     * @param id 
+     */
+    async GetSkuDetail(id) {
+        const res = await Help.request({ url: "/Api/cgi/Get/GetSkuDetail", data: { id } });
+        return res;
+    }
+    /**
      * 创建 收货地址
      * @param data 
      * isDefault	Boolean	
@@ -114,8 +123,8 @@ class Server {
     /**
      * 优惠劵
      */
-    async Coupon(){
-        const res = await Help.request({ url: "/Api/cgi/List/Coupon"});
+    async Coupon() {
+        const res = await Help.request({ url: "/Api/cgi/List/Coupon" });
         return res;
     }
     /**
@@ -136,6 +145,21 @@ class Server {
     async CreateSaleBill(data) {
         const res = await Help.request({ url: "/Api/cgi/Create/SaleBill", data, method: "POST" });
         return res;
+    }
+    /**
+     * 支付
+     * @param id 
+     */
+    async PayByWeixinBegin(id) {
+        const res = await Help.request({ url: "/Api/cgi/Pay/ByWeixinBegin", data: { billid: id }, method: "POST" });
+        await Help.requestPayment(
+            {
+                nonceStr: res.nonceStr,
+                package: 'prepay_id=' + res.package,
+                paySign: res.sign,
+                timeStamp: res.timeStamp + '',
+            }
+        )
     }
 
 }

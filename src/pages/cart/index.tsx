@@ -1,6 +1,6 @@
 import { Image, Navigator, Text, View } from '@tarojs/components';
 import Taro, { Component, Config } from '@tarojs/taro';
-import { AtButton, AtIcon, AtInputNumber, AtList, AtListItem, AtTag, AtFloatLayout, AtRadio } from 'taro-ui';
+import { AtButton, AtIcon, AtInputNumber, AtList, AtListItem, AtTag, AtFloatLayout, AtRadio, AtModal } from 'taro-ui';
 import Cart from '../../utils/cart';
 import Help from '../../utils/help';
 import Server from '../../utils/server';
@@ -59,7 +59,7 @@ export default class Index extends Component {
     this.setState({
       data: cart,
       price: price.toFixed(2),
-      userName: Help.data.address.userName,
+      userName: Help.data.token ? Help.data.address.userName : "未登陆",
       allSelect: allSelect
     })
     Taro.setStorageSync("cart", cart);
@@ -99,8 +99,11 @@ export default class Index extends Component {
     //   address: res.address
     // }
 
-    if (this.state.data.slice().length <= 0) {
+    if (this.state.data.length <= 0) {
       return Taro.showToast({ title: "购物车没有商品", icon: "none" })
+    }
+    if (this.state.data.filter(x => x.select).length <= 0) {
+      return Taro.showToast({ title: "未选择结算商品", icon: "none" })
     }
     if (Help.data.address.userName == "" || Help.data.address.userName == null) {
       return Taro.showToast({ title: "请设置收货地址", icon: "none" })
@@ -111,7 +114,7 @@ export default class Index extends Component {
       if (res.items.length > 0) {
         return this.setState({ isOpened: true, couponsList: res.items })
       } else {
-        this.onPayment();
+        return this.onPayment();
       }
     }
     this.onPayment();
@@ -122,7 +125,7 @@ export default class Index extends Component {
       contactMan: Help.data.address.userName,
       contactPhone: Help.data.address.telNumber,
       address: Help.data.address.address,
-      skus: this.state.data.map(x => {
+      skus: this.state.data.filter(x => x.select).map(x => {
         return {
           id: x.id,
           count: x.number
@@ -130,9 +133,22 @@ export default class Index extends Component {
       })
     });
     if (res) {
-      Cart.cart = [];
-      this.setCart([])
-      this.setState({ isOpened: false, couponsKey: null, coupons: null })
+      Cart.cart = Cart.cart.filter(x => !x.select);
+      this.setCart(Cart.cart)
+      this.setState({
+        isOpened: false, couponsKey: null, coupons: {
+          no: '',
+          amount: 0,
+        }
+      })
+      await Help.requestPayment(
+        {
+          nonceStr: res.payNonceStr,
+          package: 'prepay_id=' + res.payPackage,
+          paySign: res.paySign,
+          timeStamp: res.payTimeStamp + '',
+        }
+      )
     }
   }
   onGotoMore() {
@@ -150,6 +166,13 @@ export default class Index extends Component {
     const coupons = JSON.parse(e)
     this.setState({ couponsKey: e, coupons })
   }
+  onDelete(id, e) {
+    e.stopPropagation()
+    e.preventDefault();
+    Cart.cart = Cart.cart.filter(x => x.id != id);
+    this.setCart(Cart.cart)
+    // Taro.showToast({title:""})
+  }
   render() {
     return (
       <View className='index' >
@@ -166,18 +189,19 @@ export default class Index extends Component {
               </View>
               <View className='at-col at-col-4 data-img' >
                 <Image
-                  src='https://img14.360buyimg.com/babel/s700x360_jfs/t1/4099/12/2578/101668/5b971b4bE65ae279d/89dd1764797acfd9.jpg!q90!cc_350x180'
+                  src={data.thumbUrl}
                 />
               </View>
               <View className='at-col at-col-7 data-info'>
                 <View className='at-row data-name'>
-                  {data.id}
+                  {data.text}
+                  <View className="delete" onClick={this.onDelete.bind(this, data.id)}>删除</View>
                 </View>
                 <View className="data-tag">
                   <AtTag size='small'>{'标签'}</AtTag>
                 </View>
                 <View className='at-row data-price'  >
-                  <Text className="price">￥ {parseInt(data.price).toFixed(2)}</Text>
+                  <Text className="price">￥ {parseFloat(data.price).toFixed(2)}</Text>
                   <View className="AtInputNumber" onClick={this.stopPropagation}>
                     <AtInputNumber
                       min={1}
@@ -189,6 +213,7 @@ export default class Index extends Component {
                   </View>
                 </View>
               </View>
+
             </View>
           })}
         </View>

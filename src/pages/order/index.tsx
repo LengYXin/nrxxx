@@ -100,8 +100,9 @@ export default class Index extends Component {
   onScrollToLower() {
     this.getData();
   }
-  onClick(data) {
-    console.log(data);
+  async onClick(data) {
+    const res = await Server.PayByWeixinBegin(data.id)
+    this.getData(true);
   }
   render() {
     const state = {
@@ -110,7 +111,7 @@ export default class Index extends Component {
       '190102': '待收货',
       '190103': '已完成',
     }
-
+    console.log(this.state.list)
     return (
       <View >
         <AtTabs
@@ -136,7 +137,7 @@ export default class Index extends Component {
             return <View key={index}>
               <View style={{ height: "8px" }}></View>
               <AtCard
-                extra={`￥${parseInt(data.amount).toFixed(2)}`}
+                extra={`￥${parseFloat(data.amount).toFixed(2)}`}
                 title={`[ ${state[data.status]} ] : ${data.no}`}
                 note={data.createdTime}
                 className="order-card"
@@ -153,7 +154,7 @@ export default class Index extends Component {
                         {x.text}
                       </View>
                       <View className='at-row data-price'>
-                        <Text>￥{parseInt(x.amount).toFixed(2)}</Text> 数量：{x.count}
+                        <Text>￥{parseFloat(x.amount).toFixed(2)}</Text> 数量：{x.count}
                       </View>
                     </View>
                   </View>
